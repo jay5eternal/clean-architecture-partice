@@ -1,4 +1,4 @@
-namespace ShelfLayoutManager;
+namespace Presentation;
 
 public class WeatherForecast
 {
