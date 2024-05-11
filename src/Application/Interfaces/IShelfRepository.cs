@@ -18,4 +18,10 @@ public interface IShelfRepository
     /// </summary>
     /// <returns>Document Count</returns>
     Task<int> GetCountAsync();
+    
+    /// <summary>
+    /// Get Shelf Document 
+    /// </summary>
+    /// <returns>Shelf Document</returns>
+    Task<Shelf> GetAsync();
 }

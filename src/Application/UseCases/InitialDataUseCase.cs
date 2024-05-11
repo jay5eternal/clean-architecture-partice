@@ -7,6 +7,9 @@ using MiniExcelLibs;
 
 namespace Application.UseCases;
 
+/// <summary>
+/// InitialDataUseCase
+/// </summary>
 public class InitialDataUseCase : IInitialDataUseCase
 {
     /// <summary>

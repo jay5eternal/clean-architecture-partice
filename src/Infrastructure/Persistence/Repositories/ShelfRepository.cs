@@ -52,6 +52,18 @@ public class ShelfRepository : IShelfRepository
     }
 
     /// <summary>
+    /// Get Shelf Document 
+    /// </summary>
+    /// <returns>Shelf Document</returns>
+    public async Task<Shelf> GetAsync()
+    {
+        var shelfCursor = await _shelves.FindAsync(Builders<Infrastructure.Persistence.Entities.Shelfs.Shelf>.Filter.Empty);
+        var infraShelf = await shelfCursor.FirstAsync();
+        var domainShelf = InfrastructureShelfMappingToDomain(infraShelf);
+        return domainShelf;
+    }
+
+    /// <summary>
     /// Map Domain Shelf Class To Infrastructure class
     /// </summary>
     /// <param name="shelf">Domain Shelf</param>
@@ -115,5 +127,76 @@ public class ShelfRepository : IShelfRepository
         }
 
         return shelfToMapping;
+    }
+    
+    /// <summary>
+    /// Map infrastructure Shelf Class To Domain class
+    /// </summary>
+    /// <param name="infraShelf">infrastructure Shelf</param>
+    /// <returns>Domain Shelf</returns>
+    private Shelf InfrastructureShelfMappingToDomain(Infrastructure.Persistence.Entities.Shelfs.Shelf infraShelf)
+    {
+        if (infraShelf is null)
+        {
+            return null;
+        }
+        
+        var domainShelf = new Shelf
+        {
+            Cabinets = new List<Cabinet>()
+        };
+
+        foreach (var infraCabinet in infraShelf.Cabinets)
+        {
+            var domainCabinet = new Cabinet
+            {
+                Number = infraCabinet.Number,
+                Position = new Position
+                {
+                    X = infraCabinet.Position.X,
+                    Y = infraCabinet.Position.Y,
+                    Z = infraCabinet.Position.Z
+                },
+                Size = new Size
+                {
+                    Width = infraCabinet.Size.Width,
+                    Depth = infraCabinet.Size.Depth,
+                    Height = infraCabinet.Size.Height
+                },
+                Rows = new List<Row>()
+            };
+
+            foreach (var infraRow in infraCabinet.Rows)
+            {
+                var domainRow = new Row
+                {
+                    Number = infraRow.Number,
+                    PositionZ = infraRow.PositionZ,
+                    Size = new RowSize
+                    {
+                        Height = infraRow.Size.Height
+                    },
+                    Lanes = new List<Lane>()
+                };
+
+                foreach (var infraLane in infraRow.Lanes)
+                {
+                    var domainLane = new Lane
+                    {
+                        Number = infraLane.Number,
+                        JanCode = infraLane.JanCode,
+                        Quantity = infraLane.Quantity,
+                        PositionX = infraLane.PositionX
+                    };
+                    domainRow.Lanes.Add(domainLane);
+                }
+
+                domainCabinet.Rows.Add(domainRow);
+            }
+
+            domainShelf.Cabinets.Add(domainCabinet);
+        }
+
+        return domainShelf;
     }
 }
