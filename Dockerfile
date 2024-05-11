@@ -17,6 +17,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-WORKDIR /app
+WORKDIR /app/src
 COPY --from=publish /app/publish .
+COPY ["src/Domain/Files", "/app/Domain/Files"]
 ENTRYPOINT ["dotnet", "Presentation.dll"]
