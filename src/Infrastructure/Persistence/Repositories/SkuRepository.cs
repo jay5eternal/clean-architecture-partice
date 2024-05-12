@@ -51,6 +51,28 @@ public class SkuRepository : ISkuRepository
     }
 
     /// <summary>
+    /// Get Sku Document
+    /// </summary>
+    /// <param name="janCode">A unique identifier for the SKU</param>
+    /// <returns>Sku Document</returns>
+    public async Task<Sku> GetAsync(string janCode)
+    {
+        var janCodeSkuFilter = Builders<Infrastructure.Persistence.Entities.Skus.Sku>.Filter.Eq(x => x.JanCode, janCode);
+        var skuCursor = await _skus.FindAsync(janCodeSkuFilter);
+        var infraShelf = await skuCursor.FirstOrDefaultAsync();
+
+        if (infraShelf is null)
+        {
+            return null;
+        }
+
+        var domainShelf = InfraSkuMappingToDomain(new List<Infrastructure.Persistence.Entities.Skus.Sku>
+            { infraShelf }).FirstOrDefault();
+        
+        return domainShelf;
+    }
+
+    /// <summary>
     /// Map Domain skus Class To Infrastructure class
     /// </summary>
     /// <param name="skus">Domain skus</param>
@@ -75,5 +97,48 @@ public class SkuRepository : ISkuRepository
             infraSkus.Add(infraSku);
         }
         return infraSkus;
+    }
+
+    /// <summary>
+    /// Map Infrastructure skus Class To Domain class
+    /// </summary>
+    /// <param name="infraSkus">Infrastructure skus</param>
+    /// <returns>Domain skus</returns>
+    private List<Sku> InfraSkuMappingToDomain(List<Infrastructure.Persistence.Entities.Skus.Sku> infraSkus)
+    {
+        if (infraSkus is null || infraSkus.Any() == false)
+        {
+            return null;
+        }
+
+        var domainSkus = new List<Sku>();
+        foreach (var infraSku in infraSkus)
+        {
+            if (infraSku is null)
+            {
+                continue;
+            }
+
+            var domainSku = new Sku
+            {
+                JanCode = infraSku.JanCode,
+                Name = infraSku.Name,
+                X = infraSku.X,
+                Y = infraSku.Y,
+                Z = infraSku.Z,
+                ImageURL = infraSku.ImageURL,
+                Size = infraSku.Size,
+                TimeStamp = infraSku.TimeStamp,
+                Shape = infraSku.Shape
+            };
+            domainSkus.Add(domainSku);
+        }
+
+        if (domainSkus.Any() == false)
+        {
+            return null;
+        }
+
+        return domainSkus;
     }
 }

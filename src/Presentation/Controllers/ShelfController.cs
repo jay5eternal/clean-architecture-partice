@@ -17,12 +17,21 @@ public class ShelfController : ControllerBase
     private readonly IGetShelfUseCase _getShelfUseCase;
 
     /// <summary>
+    /// IAddShelfUseCase
+    /// </summary>
+    private readonly IAddSkuToShelfUseCase _addSkuToShelfUseCase;
+
+    /// <summary>
     /// ShelfController constructor
     /// </summary>
     /// <param name="getShelfUseCase">IGetShelfUseCase</param>
-    public ShelfController(IGetShelfUseCase getShelfUseCase)
+    /// <param name="addSkuToShelfUseCase">IAddShelfUseCase</param>
+    public ShelfController(
+        IGetShelfUseCase getShelfUseCase,
+        IAddSkuToShelfUseCase addSkuToShelfUseCase)
     {
         _getShelfUseCase = getShelfUseCase;
+        _addSkuToShelfUseCase = addSkuToShelfUseCase;
     }
 
     /// <summary>
@@ -38,5 +47,25 @@ public class ShelfController : ControllerBase
             Shelf = shelf
         };
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Add Sku To Shelf
+    /// </summary>
+    /// <param name="request">AddSkuToShelf Request Entity</param>
+    /// <returns>ActionResult</returns>
+    [HttpPost("sku-add")]
+    public async Task<IActionResult> AddSku([FromBody] AddSkuToShelfRequest request)
+    {
+        try
+        {
+            await _addSkuToShelfUseCase.ExecuteAsync(request);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+        
     }
 }

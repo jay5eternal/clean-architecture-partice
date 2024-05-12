@@ -29,7 +29,7 @@ public class DataController : ControllerBase
     /// load initial data from files
     /// </summary>
     /// <returns>ActionResult</returns>
-    [HttpPost("load-initial-data")]
+    [HttpPost("initial-data-load")]
     public async Task<IActionResult> LoadInitialData()
     {
         await _initialDataUseCase.InitialAsync();

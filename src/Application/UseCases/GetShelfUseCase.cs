@@ -17,8 +17,7 @@ public class GetShelfUseCase : IGetShelfUseCase
     /// GetShelfUseCase constructor
     /// </summary>
     /// <param name="shelfRepository">IShelfRepository</param>
-    public GetShelfUseCase(
-        IShelfRepository shelfRepository)
+    public GetShelfUseCase(IShelfRepository shelfRepository)
     {
         _shelfRepository = shelfRepository;
     }
