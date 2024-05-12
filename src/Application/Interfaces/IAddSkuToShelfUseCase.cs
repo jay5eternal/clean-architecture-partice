@@ -13,4 +13,10 @@ public interface IAddSkuToShelfUseCase
     /// <param name="request">AddSkuToShelf Request Entity</param>
     /// <returns>Task</returns>
     Task ExecuteAsync(AddSkuToShelfRequest request);
+
+    /// <summary>
+    /// DoValidate
+    /// </summary>
+    /// <param name="request">AddSkuToShelf Request Entity</param>
+    Task DoValidateBeforeAddAsync(AddSkuToShelfRequest request);
 }

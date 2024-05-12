@@ -1,9 +1,9 @@
 ﻿namespace Contracts.Shelf;
 
 /// <summary>
-/// AddSkuToShelf Request Entity
+/// MoveSkuNewPosition Request Entity
 /// </summary>
-public class AddSkuToShelfRequest
+public class MoveSkuNewPositionRequest
 {
     /// <summary>
     /// A unique identifier for the Cabinet.
@@ -19,11 +19,6 @@ public class AddSkuToShelfRequest
     /// A unique identifier for the lane.
     /// </summary>
     public int? LaneNumber { get; set; }
-
-    /// <summary>
-    /// A unique identifier for the SKU.
-    /// </summary>
-    public string JanCode { get; set; }
 
     /// <summary>
     /// The number of drinks that can be placed in the lane.

@@ -22,16 +22,24 @@ public class ShelfController : ControllerBase
     private readonly IAddSkuToShelfUseCase _addSkuToShelfUseCase;
 
     /// <summary>
+    /// IMoveSkuInShelfUseCase
+    /// </summary>
+    private readonly IMoveSkuInShelfUseCase _moveSkuInShelfUseCase;
+
+    /// <summary>
     /// ShelfController constructor
     /// </summary>
     /// <param name="getShelfUseCase">IGetShelfUseCase</param>
     /// <param name="addSkuToShelfUseCase">IAddShelfUseCase</param>
+    /// <param name="moveSkuInShelfUseCase">IMoveSkuInShelfUseCase</param>
     public ShelfController(
         IGetShelfUseCase getShelfUseCase,
-        IAddSkuToShelfUseCase addSkuToShelfUseCase)
+        IAddSkuToShelfUseCase addSkuToShelfUseCase,
+        IMoveSkuInShelfUseCase moveSkuInShelfUseCase)
     {
         _getShelfUseCase = getShelfUseCase;
         _addSkuToShelfUseCase = addSkuToShelfUseCase;
+        _moveSkuInShelfUseCase = moveSkuInShelfUseCase;
     }
 
     /// <summary>
@@ -41,12 +49,19 @@ public class ShelfController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetShelf()
     {
-        var shelf = await _getShelfUseCase.ExecuteAsync();
-        var response = new GetShelfResponse
+        try
         {
-            Shelf = shelf
-        };
-        return Ok(response);
+            var shelf = await _getShelfUseCase.ExecuteAsync();
+            var response = new GetShelfResponse
+            {
+                Shelf = shelf
+            };
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     /// <summary>
@@ -66,6 +81,24 @@ public class ShelfController : ControllerBase
         {
             return BadRequest(e.Message);
         }
-        
+    }
+
+    /// <summary>
+    /// Move Sku In Shelf
+    /// </summary>
+    /// <param name="request">MoveSkuInShel Request Entity</param>
+    /// <returns>ActionResult</returns>
+    [HttpPost("sku-move")]
+    public async Task<IActionResult> MoveSku([FromBody] MoveSkuInShelfRequest request)
+    {
+        try
+        {
+            await _moveSkuInShelfUseCase.ExecuteAsync(request);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }

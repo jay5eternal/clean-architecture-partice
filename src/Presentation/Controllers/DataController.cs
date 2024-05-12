@@ -32,7 +32,14 @@ public class DataController : ControllerBase
     [HttpPost("initial-data-load")]
     public async Task<IActionResult> LoadInitialData()
     {
-        await _initialDataUseCase.InitialAsync();
-        return Ok("Data loaded successfully");
+        try
+        {
+            await _initialDataUseCase.InitialAsync();
+            return Ok("Data loaded successfully");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }

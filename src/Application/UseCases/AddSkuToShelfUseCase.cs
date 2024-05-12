@@ -39,7 +39,7 @@ public class AddSkuToShelfUseCase : IAddSkuToShelfUseCase
     public async Task ExecuteAsync(AddSkuToShelfRequest request)
     {
         //// Validate
-        await DoValidateAsync(request);
+        await DoValidateBeforeAddAsync(request);
         await _shelfRepository.AddSkuAsync(request);
     }
 
@@ -47,7 +47,7 @@ public class AddSkuToShelfUseCase : IAddSkuToShelfUseCase
     /// DoValidate
     /// </summary>
     /// <param name="request">AddSkuToShelf Request Entity</param>
-    private async Task DoValidateAsync(AddSkuToShelfRequest request)
+    public async Task DoValidateBeforeAddAsync(AddSkuToShelfRequest request)
     {
         var sku = await this._skuRepository.GetAsync(request.JanCode);
         if (sku is null)

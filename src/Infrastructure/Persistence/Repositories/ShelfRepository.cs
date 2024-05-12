@@ -35,12 +35,13 @@ public class ShelfRepository : IShelfRepository
     /// Add Shelf
     /// </summary>
     /// <param name="shelf">Shelf</param>
+    /// <remarks>Standalone servers do not support transactions.</remarks>
     public async Task AddAsync(Shelf shelf)
     {
         var shelfToAdd = DomainShelfMappingToInfra(shelf);
         var session = await _mongoDbContext.GetSessionAsync();
-        
         await _shelves.InsertOneAsync(session, shelfToAdd);
+        await session.CommitTransactionAsync();
     }
 
     /// <summary>
@@ -107,9 +108,15 @@ public class ShelfRepository : IShelfRepository
     /// AddSkuToShelf 
     /// </summary>
     /// <param name="request">AddSkuToShelf Request Entity</param>
-    public async Task AddSkuAsync(AddSkuToShelfRequest request)
+    /// <param name="session">MongoDB session</param>
+    /// <remarks>Standalone servers do not support transactions.</remarks>
+    public async Task AddSkuAsync(AddSkuToShelfRequest request, IClientSessionHandle session = null)
     {
-        var session = await _mongoDbContext.GetSessionAsync();
+        if (session is null)
+        {
+            session = await _mongoDbContext.GetSessionAsync();
+        }
+
         var shelfQuery = _shelves.AsQueryable(session);
         var infraShelf = shelfQuery.FirstOrDefault();
         var row = infraShelf.Cabinets
@@ -141,7 +148,70 @@ public class ShelfRepository : IShelfRepository
             Builders<Infrastructure.Persistence.Entities.Shelfs.Shelf>.Update.Set(x => x.Cabinets, infraShelf.Cabinets);
         await _shelves.UpdateOneAsync(session, updateFilter, updateDef);
     }
-    
+
+    /// <summary>
+    /// RemoveSku 
+    /// </summary>
+    /// <param name="request">RemoveSku Request Entity</param>
+    /// <param name="session">MongoDB session</param>
+    /// <remarks>Standalone servers do not support transactions.</remarks>
+    public async Task RemoveSkuAsync(RemoveSkuRequest request, IClientSessionHandle session = null)
+    {
+        if (session is null)
+        {
+            session = await _mongoDbContext.GetSessionAsync();
+        }
+
+        var shelfQuery = _shelves.AsQueryable(session);
+        var infraShelf = shelfQuery.FirstOrDefault();
+        var row = infraShelf.Cabinets
+            .Where(c => c.Number == request.CabinetNumber)
+            .SelectMany(c => c.Rows)
+            .First(r => r.Number == request.RowNumber);
+
+        row.Lanes = row.Lanes.Where(l => l.Number != request.LaneNumber && l.JanCode != request.JanCode).ToList();
+
+        var updateFilter =
+            Builders<Infrastructure.Persistence.Entities.Shelfs.Shelf>.Filter.Eq(x => x.Id, infraShelf.Id);
+
+        var updateDef =
+            Builders<Infrastructure.Persistence.Entities.Shelfs.Shelf>.Update.Set(x => x.Cabinets, infraShelf.Cabinets);
+        await _shelves.UpdateOneAsync(session, updateFilter, updateDef);
+    }
+
+    /// <summary>
+    /// MoveSkuInShelf 
+    /// </summary>
+    /// <param name="request">MoveSkuInShel Request Entity</param>
+    /// <remarks>Standalone servers do not support transactions.</remarks>
+    public async Task MoveSkuInShelfAsync(MoveSkuInShelfRequest request)
+    {
+        var session = await _mongoDbContext.GetSessionAsync();
+        //// Remove Origin Position
+        var originPosition = request.OriginPosition;
+        var removeRequest = new RemoveSkuRequest
+        {
+            CabinetNumber = originPosition.CabinetNumber,
+            RowNumber = originPosition.RowNumber,
+            LaneNumber = originPosition.LaneNumber,
+            JanCode = request.JanCode
+        };
+        await RemoveSkuAsync(removeRequest, session);
+        //// Add New Position
+        var newPosition = request.NewPosition;
+        var addRequest = new AddSkuToShelfRequest
+        {
+            CabinetNumber = newPosition.CabinetNumber,
+            RowNumber = newPosition.RowNumber,
+            LaneNumber = newPosition.LaneNumber,
+            JanCode = request.JanCode,
+            Quantity = newPosition.Quantity,
+            PositionX = newPosition.PositionX,
+            IsLaneExist = newPosition.IsLaneExist
+        };
+        await AddSkuAsync(addRequest, session);
+    }
+
     /// <summary>
     /// Map Domain Shelf Class To Infrastructure class
     /// </summary>

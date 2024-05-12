@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInitialDataUseCase, InitialDataUseCase>();
         services.AddScoped<IGetShelfUseCase, GetShelfUseCase>();
         services.AddScoped<IAddSkuToShelfUseCase, AddSkuToShelfUseCase>();
+        services.AddScoped<IMoveSkuInShelfUseCase, MoveSkuInShelfUseCase>();
 
         return services;
     }

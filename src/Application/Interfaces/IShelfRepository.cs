@@ -1,5 +1,6 @@
 ﻿using Contracts.Shelf;
 using Domain.Entities.Shelfs;
+using MongoDB.Driver;
 
 namespace Application.Interfaces;
 
@@ -38,5 +39,19 @@ public interface IShelfRepository
     /// AddSkuToShelf 
     /// </summary>
     /// <param name="request">AddSkuToShelf Request Entity</param>
-    Task AddSkuAsync(AddSkuToShelfRequest request);
+    /// <param name="session">MongoDB session</param>
+    Task AddSkuAsync(AddSkuToShelfRequest request, IClientSessionHandle session = null);
+
+    /// <summary>
+    /// RemoveSku 
+    /// </summary>
+    /// <param name="request">RemoveSku Request Entity</param>
+    /// <param name="session">MongoDB session</param>
+    Task RemoveSkuAsync(RemoveSkuRequest request, IClientSessionHandle session = null);
+
+    /// <summary>
+    /// MoveSkuInShelf 
+    /// </summary>
+    /// <param name="request">MoveSkuInShel Request Entity</param>
+    Task MoveSkuInShelfAsync(MoveSkuInShelfRequest request);
 }
