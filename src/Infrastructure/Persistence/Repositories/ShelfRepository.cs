@@ -40,8 +40,9 @@ public class ShelfRepository : IShelfRepository
     {
         var shelfToAdd = DomainShelfMappingToInfra(shelf);
         var session = await _mongoDbContext.GetSessionAsync();
+        //session.StartTransaction();
         await _shelves.InsertOneAsync(session, shelfToAdd);
-        await session.CommitTransactionAsync();
+        //await session.CommitTransactionAsync();
     }
 
     /// <summary>
